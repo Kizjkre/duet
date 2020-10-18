@@ -1,9 +1,11 @@
 {
-  "name": "among-us",
+  "name": "duet",
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "node ./bin/www"
+    "start": "node ./bin/www",
+    "nodemon": "nodemon ./bin/www",
+    "peer": "peerjs --port 3001"
   },
   "dependencies": {
     "cookie-parser": "~1.4.4",
