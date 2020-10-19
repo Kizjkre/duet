@@ -5,7 +5,7 @@
   "scripts": {
     "start": "node ./bin/www",
     "nodemon": "nodemon ./bin/www",
-    "peer": "peerjs --port 3001"
+    "peer": "node ./server.js"
   },
   "dependencies": {
     "cookie-parser": "~1.4.4",
