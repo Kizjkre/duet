@@ -1,5 +1,12 @@
+@import 'node_modules/bulma/sass/utilities/initial-variables';
+
+$primary: #ffc0cb;
+
 video {
+  border-radius: 10px;
   transform: rotateY(180deg);
   -webkit-transform:rotateY(180deg); /* Safari and Chrome */
   -moz-transform:rotateY(180deg); /* Firefox */
 }
+
+@import 'node_modules/bulma/bulma';

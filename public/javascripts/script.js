@@ -5,10 +5,14 @@ const peer = new Peer(undefined, {
 });
 const peers = {};
 
+let i = 0;
+
 const addUser = (video, stream) => {
   video.srcObject = stream;
   video.addEventListener('loadedmetadata', () => video.play());
-  document.body.append(video);
+  document.getElementsByClassName('video-container')[i].append(video);
+  video.classList.add('has-ratio');
+  i++;
 };
 
 const connect = (user, stream) => {
