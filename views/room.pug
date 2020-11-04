@@ -6,15 +6,8 @@ block head
   script(src = '/javascripts/script.js', defer)
 
 block content
-  section.hero.is-primary
+  figure#me.video-container.is-overlay
+  section.hero.is-primary.is-fullheight
     .hero-body
-      .container
-        h1.title Room
-        h2.subtitle Welcome
-  section.section
-    .container
-      .columns
-        .column
-          figure.video-container.image.is-4by3
-        .column
-          figure.video-container.image.is-4by3
+      .container.has-text-centered
+        figure.video-container.image

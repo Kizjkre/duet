@@ -1,12 +1,26 @@
 @import 'node_modules/bulma/sass/utilities/initial-variables';
 
 $primary: #ffc0cb;
+$background: $primary;
 
 video {
   border-radius: 10px;
+  height: 75vh !important;
+  max-width: 90vw !important;
+  width: auto;
+}
+
+#me {
+  position: absolute;
+  right: 3rem;
+  top: 3rem;
   transform: rotateY(180deg);
   -webkit-transform:rotateY(180deg); /* Safari and Chrome */
   -moz-transform:rotateY(180deg); /* Firefox */
+  z-index: 99;
+  video {
+    height: 20vh !important;
+  }
 }
 
 @import 'node_modules/bulma/bulma';
