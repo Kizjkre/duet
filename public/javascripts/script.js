@@ -1,9 +1,21 @@
 const socket = io('/');
+
+const peerTemplate = document.getElementById('peer');
+const port = parseInt(peerTemplate.content.textContent);
+peerTemplate.remove();
+
 const peer = new Peer(undefined, {
   host: '/',
-  port: 3001
+  port
 });
 const peers = {};
+
+const activkeyTemplate = document.getElementById('activkey');
+const activkey = activkeyTemplate.content.textContent;
+activkeyTemplate.remove();
+
+const sigmoid = (input, { min, max, center, coefficient } = { min: 0, max: 1, center: 0, coefficient: 1 }) =>
+  (max - min) / (1 + Math.E ** (-coefficient * (input - center))) + min;
 
 const addUser = (video, stream, i) => {
   video.srcObject = stream;
@@ -22,7 +34,7 @@ const connect = (user, stream) => {
 
 peer.on('open', id => socket.emit('join', new URL(document.location).pathname.replace('/room/', ''), id));
 
-socket.on('disconnected', user => peers[user].close());
+socket.on('disconnected', user => peers[user] && peers[user].close());
 
 const video = document.createElement('video');
 video.muted = true;
@@ -35,4 +47,48 @@ navigator.mediaDevices.getUserMedia({ video: { width: 1280, height: 720 }, audio
     call.on('stream', incoming => addUser(incomingVideo, incoming, 1));
   });
   socket.on('connected', user => connect(user, stream));
+
+  const track = stream.getVideoTracks()[0];
+  const capture = new ImageCapture(track);
+  setTimeout(() =>
+    capture.takePhoto().then(blob => {
+      const img = new Image();
+      const canvas = document.createElement('canvas');
+      img.src = URL.createObjectURL(blob);
+      img.onload = async () => {
+        canvas.width = img.width;
+        canvas.height = img.height;
+
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0);
+
+        const pixels = ctx.getImageData(0, 0, img.width, img.height).data;
+        let avg = 0;
+        for (let i = 0; i < pixels.length; i += 4) {
+          const [r, g, b] = [pixels[i], pixels[i + 1], pixels[i + 2]];
+          avg += (r + g + b) / 3;
+        }
+        avg /= pixels.length / 4;
+
+        const bpm = Math.round(sigmoid(avg, { min: 60, max: 100, center: 0.75 * 255, coefficient: 0.05 }));
+
+        const rng = new Math.seedrandom(avg);
+        const chords = await (await fetch('https://api.hooktheory.com/v1/trends/nodes', {
+          headers: {
+            Authorization : `Bearer ${ activkey }`
+          }
+        })).json();
+        const choice = rng();
+        let total = 0;
+        let chord;
+        for (const chordData of chords) {
+          total += chordData.probability * 1000;
+          if (total > choice * 1000) {
+            chord = chordData;
+            break;
+          }
+        }
+        console.log(chord);
+      };
+    }), 2000);
 });
