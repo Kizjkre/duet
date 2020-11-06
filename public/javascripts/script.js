@@ -78,17 +78,18 @@ navigator.mediaDevices.getUserMedia({ video: { width: 1280, height: 720 }, audio
             Authorization : `Bearer ${ activkey }`
           }
         })).json();
-        const choice = rng();
+        const choices = [rng(), rng(), rng()];
         let total = 0;
         let chord;
-        for (const chordData of chords) {
-          total += chordData.probability * 1000;
-          if (total > choice * 1000) {
-            chord = chordData;
+        for (const c of chords) {
+          total += c.probability * 1000;
+          if (total > choices[0] * 1000) {
+            chord = c;
             break;
           }
         }
-        console.log(chord);
+        console.log(chords);
+        const duration = Math.round(sigmoid(choices[1], { min: 0.5, max: 2, center: 0.5, coefficient: 10 }) * 2) / 2;
       };
     }), 2000);
 });
