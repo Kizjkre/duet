@@ -38,6 +38,9 @@ socket.on('disconnected', user => peers[user] && peers[user].close());
 const video = document.createElement('video');
 video.muted = true;
 
+const img = new Image();
+const canvas = document.createElement('canvas');
+
 navigator.mediaDevices.getUserMedia({ video: { width: 1280, height: 720 }, audio: true }).then(stream => {
   addUser(video, stream, 0);
   peer.on('call', call => {
@@ -50,8 +53,6 @@ navigator.mediaDevices.getUserMedia({ video: { width: 1280, height: 720 }, audio
   const track = stream.getVideoTracks()[0];
   const capture = new ImageCapture(track);
   setTimeout(() => capture.takePhoto().then(blob => {
-    const img = document.createElement('img');
-    const canvas = document.createElement('canvas');
     img.src = URL.createObjectURL(blob);
     img.onload = async () => {
       canvas.width = img.width;
