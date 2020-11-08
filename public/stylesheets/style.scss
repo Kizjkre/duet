@@ -1,7 +1,11 @@
 @import 'node_modules/bulma/sass/utilities/initial-variables';
 
 $primary: #ffc0cb;
+
+$box-background-color: $primary;
 $background: $primary;
+$input-background-color: lighten($primary, 7);
+$input-border-color: lighten($primary, 7);
 
 video {
   border-radius: 10px;

@@ -55,9 +55,9 @@ addEventListener('message', async e => {
   const duration = Math.round(sigmoid(hue, { min: 0.5, max: 2, center: 0.5, coefficient: 10 }) * 2) / 2;
   const rng = mulberry32(xmur3(avg)());
   const lookup = await (await fetch('../../assets/lookup.json')).json();
-  const level = Math.round(rng() * lookup[chord.chord_ID].length);
+  const level = Math.round(rng() * (lookup[chord.chord_ID].length - 1));
   const notes = lookup[chord.chord_ID][level];
-  const note = lookup[chord.chord_ID][level][Math.round(rng() * notes.length)];
+  const note = lookup[chord.chord_ID][level][Math.round(rng() * (notes.length - 1))];
   console.dir(chords);
   console.log(bpm, chord, duration, note);
   let length;
