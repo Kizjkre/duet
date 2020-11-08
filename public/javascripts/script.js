@@ -1,5 +1,6 @@
 const modal = document.getElementById('code-modal');
 const content = document.getElementById('code-modal-content');
+const error = document.getElementById('error');
 
 let open = false;
 
@@ -23,6 +24,15 @@ content.addEventListener('animationend', () => {
   }
 });
 
-document.getElementById('code').addEventListener('change', e =>
-  window.location.assign(`/room/${ e.target.value }`)
-);
+document.getElementById('code').addEventListener('change', e => {
+  const value = e.target.value;
+
+  if (value.length === 10) {
+    e.target.value = '';
+    window.location.assign(`/room/${ value }`);
+  } else {
+    error.classList.remove('is-hidden');
+  }
+});
+
+document.getElementById('error-close').addEventListener('click', () => error.classList.add('is-hidden'));

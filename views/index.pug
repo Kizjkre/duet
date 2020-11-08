@@ -27,6 +27,9 @@ block content
     .modal-background
     #code-modal-content.modal-content
       .box
+        #error.notification.is-danger.is-hidden
+          button#error-close.delete
+          p This room does not exist.
         .field
           .control
             label.label(for = 'code') Enter Room Code
