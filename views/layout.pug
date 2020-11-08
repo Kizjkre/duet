@@ -4,6 +4,33 @@ html.is-clipped
     title Duet
     link(rel = 'stylesheet', href = 'https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css')
     link(rel='stylesheet', href='/stylesheets/style.css')
+    script(src = '/javascripts/script.js', defer)
     block head
   body.is-clipped
+    nav.navbar
+      .container
+        .navbar-brand
+          a.navbar-item
+            img(src = 'https://bulma.io/images/bulma-logo.png', alt = 'Logo')
+        .navbar-menu
+          .navbar-end
+            a.navbar-item(href = '/') Home
+            .navbar-item.has-dropdown.is-hoverable
+              a.navbar-link Room
+              .navbar-dropdown
+                a.navbar-item(href = '/room/create') Create Room
+                a#join.navbar-item Join Room
+            a.navbar-item(href = '/about') About
+    #code-modal.modal
+      .modal-background
+      #code-modal-content.modal-content
+        .box
+          #error.notification.is-danger.is-hidden
+            button#error-close.delete
+            p This room does not exist.
+          .field
+            .control
+              label.label(for = 'code') Enter Room Code
+              input#code.input(type = 'text', placeholder = '··········')
+      button#close.modal-close.is-large(aria-label = 'close')
     block content

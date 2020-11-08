@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { nanoid } = require('nanoid');
 
-/* GET users listing. */
+/* GET room page. */
 router.get('/:room', (req, res) => {
   if (req.params.room === 'create') {
     res.redirect(`/room/${ nanoid(10) }`);
