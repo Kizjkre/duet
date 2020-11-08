@@ -27,7 +27,10 @@ const connect = (user, stream) => {
   const call = peer.call(user, stream);
   const video = document.createElement('video');
   call.on('stream', incoming => addUser(video, incoming, 1));
-  call.on('close', () => video.remove());
+  call.on('close', () => {
+    video.classList.add('animate__fadeOutDown');
+    video.addEventListener('animationend', () => video.remove());
+  });
   peers[user] = call;
 };
 
