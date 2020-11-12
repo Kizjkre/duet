@@ -1,3 +1,5 @@
+import createBufferMap from './createBufferMap.js';
+
 const socket = io('/');
 
 const peerTemplate = document.getElementById('peer');
@@ -9,6 +11,11 @@ const peer = new Peer(undefined, {
   port
 });
 const peers = {};
+let users = 0;
+
+const context = new AudioContext();
+const source = new AudioBufferSourceNode(context);
+const amp = new GainNode(context);
 
 const processImage = new Worker('/javascripts/workers/processImage.js');
 
@@ -40,7 +47,6 @@ socket.on('disconnected', user => peers[user] && peers[user].close());
 
 const video = document.createElement('video');
 video.muted = true;
-video.classList.add('animate__animated', 'animate__fadeInUp');
 
 const img = new Image();
 const canvas = document.createElement('canvas');
@@ -48,6 +54,9 @@ const canvas = document.createElement('canvas');
 navigator.mediaDevices.getUserMedia({ video: { width: 1280, height: 720 }, audio: true }).then(stream => {
   addUser(video, stream, 0);
   peer.on('call', call => {
+    if (++users === 2) {
+      window.location.assign('/room/create/');
+    }
     const incomingVideo = document.createElement('video');
     call.answer(stream);
     call.on('stream', incoming => addUser(incomingVideo, incoming, 1));
@@ -67,6 +76,20 @@ navigator.mediaDevices.getUserMedia({ video: { width: 1280, height: 720 }, audio
 
       const pixels = ctx.getImageData(0, 0, img.width, img.height).data;
       processImage.postMessage({ pixels, activkey });
+      processImage.onmessage = async e => {
+        const buffer = await createBufferMap(context, [{ key: 'map', url: `/assets/chords/${ e.data.chord.chord_ID }.wav` }]);
+
+        source.connect(amp).connect(context.destination);
+
+        source.buffer = buffer.map;
+
+        amp.gain.value = 0.5;
+
+        const now = context.currentTime;
+
+        source.start(now);
+        source.stop(now + source.buffer.duration);
+      };
     }
   }), 2000);
 });

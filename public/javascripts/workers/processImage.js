@@ -60,6 +60,7 @@ addEventListener('message', async e => {
   const note = lookup[chord.chord_ID][level][Math.round(rng() * (notes.length - 1))];
   console.dir(chords);
   console.log(bpm, chord, duration, note);
+  postMessage({ bpm, chord, duration, note });
   let length;
   switch (level) {
     case 0:
