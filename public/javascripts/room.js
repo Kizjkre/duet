@@ -1,4 +1,4 @@
-import createBufferMap from './createBufferMap.js';
+import ChordProgression from './helper/progression.js';
 
 const socket = io('/');
 
@@ -14,14 +14,46 @@ const peers = {};
 let users = 0;
 
 const context = new AudioContext();
-const source = new AudioBufferSourceNode(context);
-const amp = new GainNode(context);
+const source = [new AudioBufferSourceNode(context), new AudioBufferSourceNode(context)];
+const amp = [new GainNode(context), new GainNode(context)];
+const progression = new ChordProgression(context, source, amp);
+let bpm;
 
 const processImage = new Worker('/javascripts/workers/processImage.js');
 
 const activkeyTemplate = document.getElementById('activkey');
 const activkey = activkeyTemplate.content.textContent;
 activkeyTemplate.remove();
+
+const img = new Image();
+const canvas = document.createElement('canvas');
+const ctx = canvas.getContext('2d');
+
+let capture;
+let first = true;
+
+const start = () =>
+  capture.takePhoto().then(blob => {
+    img.src = URL.createObjectURL(blob);
+    img.onload = async () => {
+      ctx.drawImage(img, 0, 0);
+      const pixels = ctx.getImageData(0, 0, img.width, img.height).data;
+      processImage.postMessage({ pixels, activkey, first });
+    };
+  });
+
+processImage.onmessage = async e => {
+  if (first) {
+    bpm = e.data.bpm;
+    first = false;
+    progression
+      .addChord(e.data.chord, e.data.duration / (bpm / 60))
+      .addChord(e.data.chord2, e.data.duration2 / (bpm / 60))
+      .play(start);
+  } else {
+    progression.addChord(e.data.chord, e.data.duration / (bpm / 60));
+  }
+};
 
 const addUser = (video, stream, i) => {
   video.srcObject = stream;
@@ -48,9 +80,6 @@ socket.on('disconnected', user => peers[user] && peers[user].close());
 const video = document.createElement('video');
 video.muted = true;
 
-const img = new Image();
-const canvas = document.createElement('canvas');
-
 navigator.mediaDevices.getUserMedia({ video: { width: 1280, height: 720 }, audio: true }).then(stream => {
   addUser(video, stream, 0);
   peer.on('call', call => {
@@ -64,32 +93,6 @@ navigator.mediaDevices.getUserMedia({ video: { width: 1280, height: 720 }, audio
   socket.on('connected', user => connect(user, stream));
 
   const track = stream.getVideoTracks()[0];
-  const capture = new ImageCapture(track);
-  setTimeout(() => capture.takePhoto().then(blob => {
-    img.src = URL.createObjectURL(blob);
-    img.onload = async () => {
-      canvas.width = img.width;
-      canvas.height = img.height;
-
-      const ctx = canvas.getContext('2d');
-      ctx.drawImage(img, 0, 0);
-
-      const pixels = ctx.getImageData(0, 0, img.width, img.height).data;
-      processImage.postMessage({ pixels, activkey });
-      processImage.onmessage = async e => {
-        const buffer = await createBufferMap(context, [{ key: 'map', url: `/assets/chords/${ e.data.chord.chord_ID }.wav` }]);
-
-        source.connect(amp).connect(context.destination);
-
-        source.buffer = buffer.map;
-
-        amp.gain.value = 0.5;
-
-        const now = context.currentTime;
-
-        source.start(now);
-        source.stop(now + source.buffer.duration);
-      };
-    }
-  }), 2000);
+  capture = new ImageCapture(track);
+  setTimeout(() => start(), 2000);
 });
