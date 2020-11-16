@@ -1,4 +1,4 @@
-import ChordProgression from './helper/progression.js';
+import Progression from './helper/progression.js';
 
 const socket = io('/');
 
@@ -16,10 +16,11 @@ let users = 0;
 const context = new AudioContext();
 const source = [new AudioBufferSourceNode(context), new AudioBufferSourceNode(context)];
 const amp = [new GainNode(context), new GainNode(context)];
-const progression = new ChordProgression(context, source, amp);
+const progression = new Progression(context, source, amp);
 let bpm;
 
 const processImage = new Worker('/javascripts/workers/processImage.js');
+const processIncomingImage = new Worker('/javascripts/workers/processIncomingImage.js');
 
 const activkeyTemplate = document.getElementById('activkey');
 const activkey = activkeyTemplate.content.textContent;
@@ -29,7 +30,7 @@ const img = new Image();
 const canvas = document.createElement('canvas');
 const ctx = canvas.getContext('2d');
 
-let capture;
+let capture, incomingCapture;
 let first = true;
 
 const start = () =>
@@ -51,14 +52,25 @@ processImage.onmessage = async e => {
       .addChord(e.data.chord2, e.data.duration2 / (bpm / 60))
       .play(start);
     const drum = new Audio('/assets/drum.wav');
-    drum.playbackRate = 70 / bpm;
-    drum.volume = 0.1;
+    drum.playbackRate = bpm / 70;
+    drum.volume = 0.15;
     drum.loop = true;
     drum.play();
   } else {
     progression.addChord(e.data.chord, e.data.duration / (bpm / 60));
   }
 };
+
+let firstNote = true;
+
+// processIncomingImage.onmessage = async e => {
+//   if (firstNote) {
+//     progression
+//       .addChord(e.data.chord, e.data.duration / (bpm / 60))
+//       .addChord(e.data.chord2, e.data.duration2 / (bpm / 60))
+//       .play(start);
+//   }
+// };
 
 const addUser = (video, stream, i) => {
   video.srcObject = stream;
@@ -78,6 +90,16 @@ const connect = (user, stream) => {
   peers[user] = call;
 };
 
+const handleStream = () =>
+  capture.takePhoto().then(blob => {
+    img.src = URL.createObjectURL(blob);
+    img.onload = async () => {
+      ctx.drawImage(img, 0, 0);
+      const pixels = ctx.getImageData(0, 0, img.width, img.height).data;
+      processImage.postMessage({ pixels, first });
+    };
+  });
+
 peer.on('open', id => socket.emit('join', new URL(document.location).pathname.replace('/room/', ''), id));
 
 socket.on('disconnected', user => peers[user] && peers[user].close());
@@ -93,11 +115,14 @@ navigator.mediaDevices.getUserMedia({ video: { width: 1280, height: 720 }, audio
     }
     const incomingVideo = document.createElement('video');
     call.answer(stream);
+    const track = incoming.getVideoTracks()[0];
+    incomingCapture = new ImageCapture(track);
+    setTimeout(handleStream, window.currentChord - new Date().getTime());
     call.on('stream', incoming => addUser(incomingVideo, incoming, 1));
   });
   socket.on('connected', user => connect(user, stream));
 
   const track = stream.getVideoTracks()[0];
   capture = new ImageCapture(track);
-  setTimeout(() => start(), 2000);
+  setTimeout(start, 2000);
 });

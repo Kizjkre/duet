@@ -4,8 +4,6 @@
   const sigmoid = (input, { min, max, center, coefficient } = { min: 0, max: 1, center: 0, coefficient: 1 }) =>
     (max - min) / (1 + Math.E ** (-coefficient * (input - center))) + min;
 
-  const lookup = await (await fetch('../../assets/lookup.json')).json();
-
   let path = '';
 
   const findChord = async (value, activkey) => {
@@ -13,7 +11,6 @@
       path = '';
       return { chord_ID: '1' };
     }
-    // console.log(value, path);
     const chords = await (await fetch(`https://api.hooktheory.com/v1/trends/nodes${ path.length === 0 ? '' : `?cp=${ path }` }`, {
       headers: {
         Authorization : `Bearer ${ activkey }`
@@ -25,6 +22,7 @@
       total += c.probability * 1000;
       // if (total > sigmoid(value, { min: 0, max: 1, center: 0.75 * 255, coefficient: 0.05 }) * 1000) {
       if (total > value * 1000) {
+        console.log(c);
         path = c.child_path;
         chord = c;
         break;
@@ -70,7 +68,7 @@
     const rng = mulberry32(xmur3(avg)());
     const chord = await findChord(rng(), activkey, path);
     const duration = Math.round(sigmoid(hue, { min: 1, max: 4, center: 0.5, coefficient: 10 }));
-
+    // const duration = 2;
     // const level = Math.round(rng() * (lookup[chord.chord_ID].length - 1));
     // const notes = lookup[chord.chord_ID][level];
     // const note = lookup[chord.chord_ID][level][Math.round(rng() * (notes.length - 1))];
@@ -91,7 +89,7 @@
       const bpm = Math.round(sigmoid(avg, { min: 60, max: 100, center: 0.75 * 255, coefficient: 0.05 }));
       path = chord.child_path;
       const chord2 = await findChord(rng(), activkey);
-      postMessage({ bpm, chord, duration, chord2, duration2: duration });
+      postMessage({ bpm: 60, chord, duration, chord2, duration2: duration });
     } else {
       postMessage({ chord, duration });
     }
