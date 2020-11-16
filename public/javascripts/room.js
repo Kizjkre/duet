@@ -50,6 +50,11 @@ processImage.onmessage = async e => {
       .addChord(e.data.chord, e.data.duration / (bpm / 60))
       .addChord(e.data.chord2, e.data.duration2 / (bpm / 60))
       .play(start);
+    const drum = new Audio('/assets/drum.wav');
+    drum.playbackRate = 70 / bpm;
+    drum.volume = 0.1;
+    drum.loop = true;
+    drum.play();
   } else {
     progression.addChord(e.data.chord, e.data.duration / (bpm / 60));
   }

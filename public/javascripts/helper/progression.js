@@ -15,6 +15,8 @@ export default class ChordProgression {
     this._source[1].connect(this._amp[0]).connect(this._context.destination);
 
     this._audio = [new Audio(), new Audio()];
+    this._audio[0].volume = 0.2;
+    this._audio[1].volume = 0.2;
   }
 
   addChord(chord, duration) {
@@ -26,12 +28,18 @@ export default class ChordProgression {
     if (this._progression.length > 0) {
       if (!recursive) {
         this._audio[this._i % 2].src = `/assets/chords/${ this._progression[this._i].chord.chord_ID }.wav`;
+        this._audio[this._i % 2].load();
       }
+      this._audio[this._i % 2].muted = false;
       this._audio[this._i % 2].play();
       if (this._i + 1 < this._progression.length) {
         this._audio[(this._i + 1) % 2].src = `/assets/chords/${ this._progression[this._i + 1].chord.chord_ID }.wav`;
         this._audio[(this._i + 1) % 2].load();
-        console.log(this._progression[this._i + 1].chord.chord_ID);
+        this._audio[(this._i + 1) % 2].muted = true;
+        this._audio[(this._i + 1) % 2].play().then(() => {
+          this._audio[(this._i + 1) % 2].pause();
+          this._audio[(this._i + 1) % 2].currentTime = 0;
+        });
       }
       setTimeout(callback, this._progression[this._i].duration * 1000 / 2);
       setTimeout(() => {
