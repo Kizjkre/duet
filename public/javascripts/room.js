@@ -14,9 +14,8 @@ const peers = {};
 let users = 0;
 
 const context = new AudioContext();
-const source = [new AudioBufferSourceNode(context), new AudioBufferSourceNode(context)];
-const amp = [new GainNode(context), new GainNode(context)];
-const progression = new Progression(context, source, amp);
+const progression = new Progression(context);
+const noteProgression = new Progression(context, false);
 let bpm;
 
 const processImage = new Worker('/javascripts/workers/processImage.js');
@@ -52,7 +51,7 @@ processImage.onmessage = async e => {
       .addChord(e.data.chord2, e.data.duration2 / (bpm / 60))
       .play(start);
     const drum = new Audio('/assets/drum.wav');
-    drum.playbackRate = bpm / 70;
+    drum.playbackRate = bpm / 69;
     drum.volume = 0.15;
     drum.loop = true;
     drum.play();
@@ -63,14 +62,16 @@ processImage.onmessage = async e => {
 
 let firstNote = true;
 
-// processIncomingImage.onmessage = async e => {
-//   if (firstNote) {
-//     progression
-//       .addChord(e.data.chord, e.data.duration / (bpm / 60))
-//       .addChord(e.data.chord2, e.data.duration2 / (bpm / 60))
-//       .play(start);
-//   }
-// };
+processIncomingImage.onmessage = async e => {
+  if (firstNote) {
+    noteProgression
+      .addChord(e.data.note, e.data.duration / (bpm / 60))
+      .addChord(e.data.note, e.data.duration / (bpm / 60))
+      .play(start);
+  } else {
+    noteProgression.addChord(e.data.note, e.data.duration / (bpm / 60));
+  }
+};
 
 const addUser = (video, stream, i) => {
   video.srcObject = stream;
