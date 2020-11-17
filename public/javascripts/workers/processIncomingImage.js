@@ -33,6 +33,7 @@
         length = Math.round(sigmoid(rng(), { min: 0.125, max: 0.25, center: 0.5, coefficient: 10 }) * 8) / 8;
         break;
     }
+    console.log(note);
     postMessage({ note, duration });
   });
 })();

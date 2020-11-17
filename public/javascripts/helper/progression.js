@@ -33,10 +33,13 @@ export default class Progression {
 
       callback();
 
+      window.currentChord = { chord: this._progression[this._i].chord, duration: this._progression[this._i].duration + new Date().getTime() };
+
       const now = this._context.currentTime;
       this._source[this._i].start();
       this._source[this._i].stop(now + this._progression[this._i].duration);
       if (this._i + 1 < this._progression.length) {
+        console.log(this._progression);
         createBufferMap(this._context, [{
           key: 'map',
           url: this._chord ?
@@ -46,6 +49,15 @@ export default class Progression {
           this._source.push(new AudioBufferSourceNode(this._context));
           this._source[this._i + 1].buffer = res.map;
           this._source[this._i + 1].connect(this._amp).connect(this._context.destination);
+        }).catch(() => {
+          createBufferMap(this._context, [{
+            key: 'map',
+            url: `/assets/chords/1.wav`
+          }]).then(res => {
+            this._source.push(new AudioBufferSourceNode(this._context));
+            this._source[this._i + 1].buffer = res.map;
+            this._source[this._i + 1].connect(this._amp).connect(this._context.destination);
+          });
         });
       }
       if (this._i > 2) {

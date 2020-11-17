@@ -64,6 +64,7 @@ let firstNote = true;
 
 processIncomingImage.onmessage = async e => {
   if (firstNote) {
+    firstNote = false;
     noteProgression
       .addChord(e.data.note, e.data.duration / (bpm / 60))
       .addChord(e.data.note, e.data.duration / (bpm / 60))
@@ -83,7 +84,13 @@ const addUser = (video, stream, i) => {
 const connect = (user, stream) => {
   const call = peer.call(user, stream);
   const video = document.createElement('video');
-  call.on('stream', incoming => addUser(video, incoming, 1));
+  call.on('stream', incoming => {
+    const track = incoming.getVideoTracks()[0];
+    incomingCapture = new ImageCapture(track);
+    console.log(new Date().getTime() - window.currentChord.duration);
+    setTimeout(handleStream, new Date().getTime() - window.currentChord.duration);
+    addUser(video, incoming, 1);
+  });
   call.on('close', () => {
     video.classList.add('animate__fadeOutDown');
     video.addEventListener('animationend', () => video.remove());
@@ -93,6 +100,7 @@ const connect = (user, stream) => {
 
 const handleStream = () =>
   capture.takePhoto().then(blob => {
+    console.log(1);
     img.src = URL.createObjectURL(blob);
     img.onload = async () => {
       ctx.drawImage(img, 0, 0);
@@ -116,10 +124,9 @@ navigator.mediaDevices.getUserMedia({ video: { width: 1280, height: 720 }, audio
     }
     const incomingVideo = document.createElement('video');
     call.answer(stream);
-    const track = incoming.getVideoTracks()[0];
-    incomingCapture = new ImageCapture(track);
-    setTimeout(handleStream, window.currentChord - new Date().getTime());
-    call.on('stream', incoming => addUser(incomingVideo, incoming, 1));
+    call.on('stream', incoming => {
+      addUser(incomingVideo, incoming, 1);
+    });
   });
   socket.on('connected', user => connect(user, stream));
 
