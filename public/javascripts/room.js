@@ -28,6 +28,8 @@ activkeyTemplate.remove();
 const img = new Image();
 const canvas = document.createElement('canvas');
 const ctx = canvas.getContext('2d');
+const canvas2 = document.createElement('canvas');
+const ctx2 = canvas2.getContext('2d');
 
 let capture, incomingCapture;
 let first = true;
@@ -51,7 +53,7 @@ processImage.onmessage = async e => {
       .addChord(e.data.chord2, e.data.duration2 / (bpm / 60))
       .play(start);
     const drum = new Audio('/assets/drum.wav');
-    drum.playbackRate = bpm / 69;
+    drum.playbackRate = bpm / 69.75;
     drum.volume = 0.15;
     drum.loop = true;
     drum.play();
@@ -68,7 +70,7 @@ processIncomingImage.onmessage = async e => {
     noteProgression
       .addChord(e.data.note, e.data.duration / (bpm / 60))
       .addChord(e.data.note, e.data.duration / (bpm / 60))
-      .play(start);
+      .play(handleStream);
   } else {
     noteProgression.addChord(e.data.note, e.data.duration / (bpm / 60));
   }
@@ -85,9 +87,7 @@ const connect = (user, stream) => {
   const call = peer.call(user, stream);
   const video = document.createElement('video');
   call.on('stream', incoming => {
-    const track = incoming.getVideoTracks()[0];
-    incomingCapture = new ImageCapture(track);
-    console.log(new Date().getTime() - window.currentChord.duration);
+    incomingCapture = video;
     setTimeout(handleStream, new Date().getTime() - window.currentChord.duration);
     addUser(video, incoming, 1);
   });
@@ -98,16 +98,11 @@ const connect = (user, stream) => {
   peers[user] = call;
 };
 
-const handleStream = () =>
-  capture.takePhoto().then(blob => {
-    console.log(1);
-    img.src = URL.createObjectURL(blob);
-    img.onload = async () => {
-      ctx.drawImage(img, 0, 0);
-      const pixels = ctx.getImageData(0, 0, img.width, img.height).data;
-      processImage.postMessage({ pixels, first });
-    };
-  });
+const handleStream = () => {
+  ctx2.drawImage(incomingCapture, 0, 0, incomingCapture.videoWidth, incomingCapture.videoHeight);
+  const pixels = ctx2.getImageData(0, 0, incomingCapture.videoWidth, incomingCapture.videoHeight).data;
+  processIncomingImage.postMessage({ pixels, chord: window.currentChord.chord });
+};
 
 peer.on('open', id => socket.emit('join', new URL(document.location).pathname.replace('/room/', ''), id));
 

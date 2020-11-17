@@ -21,13 +21,16 @@
       let chord;
       for (const c of chords) {
         total += c.probability * 1000;
-        if (total > sigmoid(value, { min: 0, max: 1, center: 0.75 * 255, coefficient: 0.05 }) * 1000) {
-        // if (total > value * 1000) {
-          console.log(c);
+        // if (total > sigmoid(value, { min: 0.1, max: 0.9, center: 0.75 * 255, coefficient: 0.05 }) * 1000) {
+        if (total > value * 1000) {
           path = c.child_path;
           chord = c;
           break;
         }
+      }
+      if (!chord) {
+        path = chords[chords.length - 1].child_path;
+        chord = chords[chords.length - 1];
       }
       return chord;
     } catch {
@@ -68,10 +71,9 @@
     hue = hue < 0 ? hue + 360 : hue;
 
     const rng = mulberry32(xmur3(avg)());
-    const chord = await findChord(hue, activkey, path);
+    const chord = await findChord(rng(), activkey, path);
     // const duration = Math.round(sigmoid(rng(), { min: 2, max: 4, center: 0.5, coefficient: 10 }));
     const duration = rng() > 0.5 ? 2 : 4;
-    console.log(duration);
 
     if (first) {
       const bpm = Math.round(sigmoid(avg, { min: 60, max: 100, center: 0.75 * 255, coefficient: 0.05 }));
