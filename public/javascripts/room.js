@@ -87,8 +87,6 @@ const connect = (user, stream) => {
   const call = peer.call(user, stream);
   const video = document.createElement('video');
   call.on('stream', incoming => {
-    incomingCapture = video;
-    setTimeout(handleStream, new Date().getTime() - window.currentChord.duration);
     addUser(video, incoming, 1);
   });
   call.on('close', () => {
@@ -120,6 +118,8 @@ navigator.mediaDevices.getUserMedia({ video: { width: 1280, height: 720 }, audio
     const incomingVideo = document.createElement('video');
     call.answer(stream);
     call.on('stream', incoming => {
+      // incomingCapture = video;
+      // setTimeout(handleStream, new Date().getTime() - window.currentChord.duration);
       addUser(incomingVideo, incoming, 1);
     });
   });
@@ -127,5 +127,9 @@ navigator.mediaDevices.getUserMedia({ video: { width: 1280, height: 720 }, audio
 
   const track = stream.getVideoTracks()[0];
   capture = new ImageCapture(track);
-  setTimeout(start, 1000);
+  incomingCapture = video;
+  setTimeout(() => {
+    start();
+    setTimeout(() => setTimeout(handleStream, new Date().getTime() - window.currentChord.duration), 5000);
+  }, 1000);
 });

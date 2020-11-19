@@ -15,8 +15,7 @@
     }
     avg /= pixels.length / 4;
 
-    const rng = mulberry32(xmur3(avg)());
-    // console.log(chord);
+    const rng = mulberry32(avg * 1000000);
     const row = lookup[chord.chord_ID] ?
       lookup[chord.chord_ID] :
       lookup[chord.chord_ID[0]] ?
@@ -36,7 +35,6 @@
         length = Math.round(sigmoid(rng(), { min: 0.5, max: 1, center: 0.5, coefficient: 10 }) * 8) / 8;
         break;
     }
-    // console.log(note, duration);
     postMessage({ note, duration: length });
   });
 })();

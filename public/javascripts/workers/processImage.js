@@ -70,7 +70,7 @@
     }
     hue = hue < 0 ? hue + 360 : hue;
 
-    const rng = mulberry32(xmur3(avg)());
+    const rng = mulberry32(avg * 1000000);
     const chord = await findChord(rng(), activkey, path);
     // const duration = Math.round(sigmoid(rng(), { min: 2, max: 4, center: 0.5, coefficient: 10 }));
     const duration = rng() > 0.5 ? 2 : 4;

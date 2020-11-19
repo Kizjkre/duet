@@ -39,11 +39,11 @@ export default class Progression {
 
       if (this._chord) {
         window.currentChord = { chord: this._progression[this._i].chord, duration: this._progression[this._i].duration + new Date().getTime() };
+      } else {
+        console.log(this._progression, this._i);
       }
 
-      // const now = this._context.currentTime;
       this._source[this._i].start(this._total);
-      // this._source[this._i].stop(now + this._progression[this._i].duration);
       this._total += this._progression[this._i].duration;
       this._source[this._i].stop(this._total);
       if (this._i + 1 < this._progression.length) {
@@ -51,7 +51,7 @@ export default class Progression {
           key: 'map',
           url: this._chord ?
             `/assets/chords/${ this._progression[this._i + 1].chord.chord_ID.replace('/', ':') }.wav` :
-            `/assets/guzheng/${ this._progression[this._i + 2].chord }.m4a`
+            `/assets/guzheng/${ this._progression[this._i + 1].chord }.m4a`
         }]).then(res => {
           this._source.push(new AudioBufferSourceNode(this._context));
           this._source[this._i + 1].buffer = res.map;
