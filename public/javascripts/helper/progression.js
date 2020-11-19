@@ -9,7 +9,7 @@ export default class Progression {
     this._i = 0;
     this._chord = chord;
 
-    this._amp.gain.value = chord ? 0.2 : 0.05;
+    this._amp.gain.value = chord ? 0.2 : 0.025;
 
     this._now = context.currentTime;
     this._total = this._now;
