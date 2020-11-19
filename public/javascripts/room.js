@@ -54,7 +54,7 @@ processImage.onmessage = async e => {
       .play(start);
     const drum = new Audio('/assets/drum.wav');
     drum.playbackRate = bpm / 69.75;
-    drum.volume = 0.15;
+    drum.volume = 0.1;
     drum.loop = true;
     drum.play();
   } else {
@@ -127,5 +127,5 @@ navigator.mediaDevices.getUserMedia({ video: { width: 1280, height: 720 }, audio
 
   const track = stream.getVideoTracks()[0];
   capture = new ImageCapture(track);
-  setTimeout(start, 2000);
+  setTimeout(start, 1000);
 });

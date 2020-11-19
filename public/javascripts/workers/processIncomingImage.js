@@ -16,24 +16,27 @@
     avg /= pixels.length / 4;
 
     const rng = mulberry32(xmur3(avg)());
-    const duration = Math.round(sigmoid(rng(), { min: 1, max: 3, center: 0.5, coefficient: 10 }));
-    console.log(chord);
-    const level = Math.round(rng() * (lookup[chord.chord_ID].length - 1));
-    const notes = lookup[chord.chord_ID][level];
-    const note = lookup[chord.chord_ID][level][Math.round(rng() * (notes.length - 1))];
+    // console.log(chord);
+    const row = lookup[chord.chord_ID] ?
+      lookup[chord.chord_ID] :
+      lookup[chord.chord_ID[0]] ?
+        lookup[chord.chord_ID[0]] :
+        lookup[lookup.length - 1];
+    const level = Math.round(rng() * (row.length - 1));
+    const note = row[level][Math.round(rng() * (row[level].length - 1))];
     let length;
     switch (level) {
       case 0:
-        length = Math.round(sigmoid(rng(), { min: 0.25, max: 1, center: 0.5, coefficient: 10 }) * 8) / 8;
+        length = Math.round(sigmoid(rng(), { min: 2, max: 3, center: 0.5, coefficient: 10 }) * 8) / 8;
         break;
       case 1:
-        length = Math.round(sigmoid(rng(), { min: 0.125, max: 0.5, center: 0.5, coefficient: 10 }) * 8) / 8;
+        length = Math.round(sigmoid(rng(), { min: 1, max: 2, center: 0.5, coefficient: 10 }) * 8) / 8;
         break;
       case 2:
-        length = Math.round(sigmoid(rng(), { min: 0.125, max: 0.25, center: 0.5, coefficient: 10 }) * 8) / 8;
+        length = Math.round(sigmoid(rng(), { min: 0.5, max: 1, center: 0.5, coefficient: 10 }) * 8) / 8;
         break;
     }
-    console.log(note, duration);
-    postMessage({ note, duration });
+    // console.log(note, duration);
+    postMessage({ note, duration: length });
   });
 })();

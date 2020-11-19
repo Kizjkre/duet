@@ -9,7 +9,7 @@ export default class Progression {
     this._i = 0;
     this._chord = chord;
 
-    this._amp.gain.value = chord ? 0.3 : 0.15;
+    this._amp.gain.value = chord ? 0.2 : 0.05;
 
     this._now = context.currentTime;
     this._total = this._now;
@@ -37,9 +37,11 @@ export default class Progression {
 
       callback();
 
-      window.currentChord = { chord: this._progression[this._i].chord, duration: this._progression[this._i].duration + new Date().getTime() };
+      if (this._chord) {
+        window.currentChord = { chord: this._progression[this._i].chord, duration: this._progression[this._i].duration + new Date().getTime() };
+      }
 
-      const now = this._context.currentTime;
+      // const now = this._context.currentTime;
       this._source[this._i].start(this._total);
       // this._source[this._i].stop(now + this._progression[this._i].duration);
       this._total += this._progression[this._i].duration;
